@@ -1,38 +1,78 @@
-import Grid from 'components/grid';
-import ProductGridItems from 'components/layout/product-grid-items';
-import { defaultSort, sorting } from 'lib/constants';
-import { getProducts } from 'lib/shopify';
+// app/search/page.tsx
+import { getProducts } from "lib/shopify";
+import Link from "next/link";
 
-export const metadata = {
-  title: 'Search',
-  description: 'Search for products in the store.'
-};
+type SearchParams = { q?: string | string[] };
 
-export default async function SearchPage(props: {
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+function getQuery(searchParams?: SearchParams) {
+  const raw = searchParams?.q;
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return value?.trim().replace(/\s+/g, " ") ?? "";
+}
+
+function buildSearchQuery(term: string) {
+  const sanitized = term.replace(/"/g, "");
+  return `title:*${sanitized}*`;
+}
+
+export default async function SearchPage({
+  searchParams,
+}: {
+  searchParams?: SearchParams;
 }) {
-  const searchParams = await props.searchParams;
-  const { sort, q: searchValue } = searchParams as { [key: string]: string };
-  const { sortKey, reverse } = sorting.find((item) => item.slug === sort) || defaultSort;
+  const query = getQuery(searchParams);
 
-  const products = await getProducts({ sortKey, reverse, query: searchValue });
-  const resultsText = products.length > 1 ? 'results' : 'result';
+  if (!query) {
+    return (
+      <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+        <h1 className="text-2xl font-semibold">Search</h1>
+        <p className="text-neutral-600 dark:text-neutral-400">
+          Append <code>?q=test</code> to this page&apos;s URL to see matching products.
+        </p>
+      </main>
+    );
+  }
+
+  const products = await getProducts({ query: buildSearchQuery(query) });
+  const hasResults = products.length > 0;
+  const resultLabel = products.length === 1 ? "result" : "results";
 
   return (
-    <>
-      {searchValue ? (
-        <p className="mb-4">
-          {products.length === 0
-            ? 'There are no products that match '
-            : `Showing ${products.length} ${resultsText} for `}
-          <span className="font-bold">&quot;{searchValue}&quot;</span>
+    <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+      <header className="space-y-1">
+        <h1 className="text-2xl font-semibold">Search</h1>
+        <p className="text-neutral-600 dark:text-neutral-400">
+          Showing {products.length} {resultLabel} for{" "}
+          <span className="font-medium text-black dark:text-white">
+            &quot;{query}&quot;
+          </span>
         </p>
-      ) : null}
-      {products.length > 0 ? (
-        <Grid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          <ProductGridItems products={products} />
-        </Grid>
-      ) : null}
-    </>
+      </header>
+
+      {hasResults ? (
+        <ul className="space-y-4">
+          {products.map((product) => {
+            const minimumPrice = product.priceRange?.minVariantPrice;
+            return (
+              <li key={product.handle} className="space-y-1">
+                <Link
+                  href={`/product/${product.handle}`}
+                  className="text-lg font-medium hover:underline"
+                >
+                  {product.title}
+                </Link>
+                {minimumPrice ? (
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                    {minimumPrice.amount} {minimumPrice.currencyCode}
+                  </p>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p>No matching products found.</p>
+      )}
+    </main>
   );
 }
