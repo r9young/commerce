@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@app/*": ["app/*"],
+      "@components/*":["components/*"],
+      "@document/*":["document/*"],
+      "@lib/*":["lib/*"],
+      "@shopify/*":["lib/shopify/*"]
+    },
+    "target": "es2015",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "downlevelIteration": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": ".",
+    "noUncheckedIndexedAccess": true,
+    "ignoreDeprecations": "6.0",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "lib/create_product/mutation"],
+  "exclude": ["node_modules"],
+
+}
