@@ -14,19 +14,66 @@
         tag: ["red", "blue"] // string[]
     }
 
-*/
+
+    No conversion needed** → `useSearchParams` already gives you an object you can work with.
+
+    Access values directly** using its methods:
+
+    ```ts
+    const params = useSearchParams();
+    ```
+
+        params.get("q")` → first value for `q` (string or `null`)
+        params.get("sort")` → first value for `sort`
+        params.getAll("tag")` → all values for `tag` (string\[])
+        params.has("q")` → check if key exists (`true/false`)
+
+
+    */
 
 "use client"
 
 
-import { useSearchParams, ReadonlyURLSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
-export default function SearchParams(): string {
+export function SearchParamsTest(): string {
 
     const searchParams = useSearchParams();
 
     console.log("searchParms:", searchParams.toString())
 
     return searchParams.toString()
+
+}
+
+// Test: http://localhost:3005/search?q=hat&sort=price-asc&tag=blue
+
+export function SearchParamsClient(){
+
+    const searchParams = useSearchParams();
+
+    return searchParams
+
+}
+
+
+// ! It is different from a Server Component
+
+/* so the following question is not a React Component, it is a special page file in Next.js App Router
+   What will it to do:
+    1. Matches the route to your page component
+    2. Parses the url
+    3. calls your function, automatically filling in the props.
+
+
+// ?q=hat&sort=price-asc:
+    /*
+        { q: "hat", sort: "price-asc" }
+    */
+
+export default async function SearchParams(props:{
+     searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+
 
 }
